@@ -1,0 +1,65 @@
+version: "3.8"
+
+networks:
+  kong-net:
+
+services:
+  # --- DATABASE POSTGRES ---
+  postgres:
+    image: postgres:15
+    networks:
+      - kong-net
+    env_file: ".env"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kong"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5436:5432" # Expose port 5432 container ke port 5432 host
+
+  # --- MIGRASI KONG ---
+  kong-migrations:
+    image: kong:3.6 # OSS version
+    networks:
+      - kong-net
+    env_file: ".env"
+    command: kong migrations bootstrap
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  # --- KONG GATEWAY OSS ---
+  kong:
+    image: kong:3.6
+    networks:
+      - kong-net
+    depends_on:
+      kong-migrations:
+        condition: service_completed_successfully
+    env_file: ".env"
+    ports:
+      - "8000:8000" # Proxy
+      - "8001:8001" # Admin API
+      - "8002:8002" # Kong Manager (GUI)
+      - "8443:8443" # Proxy HTTPS
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  # ---- AUTH SERVICES ----
+  auth-service:
+    build: ./oauth-service
+    networks:
+      - kong-net
+    env_file: "./oauth-service/.env.development"
+    restart: always
+    ports:
+      - "4000:4000" # Expose port 4000 container ke port 4000 host
+    # ... (config lainnya)
+
+volumes:
+  postgres-data:
