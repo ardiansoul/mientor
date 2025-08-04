@@ -168,10 +168,21 @@ export const authenticateWithGoogle = async (data: googleAuthDto) => {
   });
 };
 
-export const me = async (refresh_token: string, access_token: string) => {
-  const { id, userId } = verifyToken(access_token);
+export const refreshToken = async (refresh_token: string) => {
+  const [session] = await db
+    .select()
+    .from(sessions)
+    .where(
+      and(
+        eq(sessions.refreshToken, refresh_token),
+        gt(sessions.expiresAt, new Date())
+      )
+    )
+    .limit(1);
 
-  const [profileExist] = await db
+  if (!session) throw new AuthError("Session expired");
+
+  const profileExists = await db
     .select({
       id: profiles.id,
       userId: profiles.userId,
@@ -184,24 +195,17 @@ export const me = async (refresh_token: string, access_token: string) => {
     })
     .from(profiles)
     .innerJoin(users, eq(profiles.userId, users.id))
-    .where(and(eq(profiles.id, id), eq(profiles.userId, userId)))
-    .limit(1);
+    .where(eq(profiles.userId, session.userId));
 
-  if (!profileExist) throw new AuthError("User not found");
+  const { deleteAt, ...rest } = profileExists[0];
 
-  const [session] = await db
-    .select()
-    .from(sessions)
-    .where(
-      and(
-        eq(sessions.userId, userId),
-        gt(sessions.expiresAt, new Date()),
-        eq(sessions.refreshToken, refresh_token)
-      )
-    )
-    .limit(1);
+  const token: TokenPayload = {
+    ...rest,
+    isActive: deleteAt === null,
+  };
+  const { accessToken } = generateToken(token);
 
-  if (!session) throw new AuthError("Session expired");
+  console.log(token, "token");
 
-  return profileExist;
+  return { accessToken };
 };

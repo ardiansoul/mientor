@@ -18,7 +18,7 @@ const buttonVariants = cva(
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        danger: "bg-red-600 text-white hover:bg-red-700",
+        danger: "bg-destructive text-white hover:bg-destructive",
         success: "bg-green-600 text-white hover:bg-green-700",
         warning: "bg-yellow-500 text-black hover:bg-yellow-600",
       },
@@ -34,7 +34,7 @@ const buttonVariants = cva(
         variant: "outline",
         intent: "danger",
         className:
-          "border bg-transparent border-red-600 text-red-600 hover:bg-red-50",
+          "border bg-transparent border-destructive text-destructive hover:bg-destrcutive",
       },
       {
         variant: "outline",

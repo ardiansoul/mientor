@@ -15,7 +15,7 @@ import {
 import { useMemo, useState } from "react";
 
 interface UserTableProps {
-  showDialog: (value: string) => void;
+  showDialog: (value: string, data: User) => void;
 }
 
 export default function UserTable({ showDialog }: UserTableProps) {
@@ -44,8 +44,14 @@ export default function UserTable({ showDialog }: UserTableProps) {
           <RowAction
             row={props.row}
             actions={[
-              { type: "edit", handler: () => showDialog("edit-user") },
-              { type: "delete", handler: () => showDialog("delete-user") },
+              {
+                type: "edit",
+                handler: () => showDialog("update", props.row.original),
+              },
+              {
+                type: "delete",
+                handler: () => showDialog("delete", props.row.original),
+              },
             ]}
           />
         ),

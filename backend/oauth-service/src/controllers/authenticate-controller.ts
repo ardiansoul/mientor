@@ -68,13 +68,13 @@ export class AuthController {
     }
   }
 
-  static async me(req: Request, res: Response, next: NextFunction) {
+  static async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
-      const { refresh_token, access_token } = extractToken(req);
+      const { refresh_token } = extractToken(req);
 
-      await authService.me(refresh_token, access_token);
+      const result = await authService.refreshToken(refresh_token);
 
-      responseHandler(res, null, "User successfully loaded");
+      responseHandler(res, result, "Token Successfully refreshed");
     } catch (error) {
       next(error);
     }

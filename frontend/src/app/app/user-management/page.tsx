@@ -4,20 +4,36 @@ import { useDialog } from "@/hooks/use-dialog";
 import UserTable from "./user-table";
 import UserForm from "./user-form";
 import { User } from "@/types/user";
+import { ActionBar } from "@/components/action-bar";
+import { ICONS } from "@/constants/icons";
+import { capitalizeFirstLetter } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { UserService } from "@/services";
+import query from "@/constants/query-keys";
+import { client } from "@/app/wrapper";
 
 export default function UserManagement() {
   const dialog = useDialog();
 
   const handleFormSuccess = () => {
     dialog.setIsOpen(false);
-    // Tambahkan refetch data table jika perlu
   };
+
+  const mutation = useMutation({
+    mutationFn: (id: string) => UserService.deleteUser(id),
+    mutationKey: query.deleteUser(String(dialog?.data?.id)),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: query.users(0) });
+      dialog.setIsOpen(false);
+    },
+  });
+
   return (
-    <div className="container p-10">
+    <div className="container px-10">
       <AppDialog
         isOpen={dialog.isOpen}
         setIsOpen={dialog.setIsOpen}
-        title={dialog.type.includes("delete") ? "Delete User" : "Update User"}
+        title={`${capitalizeFirstLetter(dialog.type)} User`}
         description="This action will permanent"
         actions={[
           {
@@ -33,16 +49,34 @@ export default function UserManagement() {
             form: "user-form",
             // handler: () => console.log("triggered"),
             text: dialog.type.includes("delete") ? "Confirm" : "Submit",
+            ...(dialog.type === "delete"
+              ? { handler: () => mutation.mutateAsync(String(dialog.data.id)) }
+              : {}),
           },
         ]}
       >
-        <UserForm
-          initialData={dialog.data as unknown as User}
-          actionType={dialog.type}
-          id={String(dialog.data?.id ?? "")}
-          onSubmitSuccess={handleFormSuccess}
-        />
+        {dialog.type !== "delete" ? (
+          <UserForm
+            initialData={dialog.data as unknown as User}
+            actionType={dialog.type}
+            id={String(dialog.data?.id ?? "")}
+            onSubmitSuccess={handleFormSuccess}
+          />
+        ) : (
+          <></>
+        )}
       </AppDialog>
+      <ActionBar
+        title="Manajemen Produk"
+        onSearch={(val) => console.log("Kirim ke backend:", val)}
+        actions={[
+          {
+            variant: "solid",
+            children: ICONS["i-add"],
+            onClick: () => dialog.showDialog("create"),
+          },
+        ]}
+      />
       <UserTable showDialog={dialog.showDialog} />
     </div>
   );

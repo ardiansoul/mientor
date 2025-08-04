@@ -12,15 +12,18 @@ const routes: Routes[] = [
       ["get", "/google", AuthController.authenticateGoogle],
       ["get", "/google/callback", AuthController.callbackGoogle],
       ["post", "/logout", AuthController.logout],
+      ["post", "/refresh_token", AuthController.refreshToken],
     ],
   },
   {
     prefix: "/users",
     handlers: [
       ["get", "/", UserController.getUsers],
-      ["get", "/:id", UserController.getUser],
       ["get", "/me", UserController.me],
+      ["get", "/:id", UserController.getUser],
       ["post", "/", UserController.createUser],
+      ["patch", "/:id", UserController.updateUser],
+      ["delete", "/:id", UserController.deleteUser],
     ],
   },
 ];

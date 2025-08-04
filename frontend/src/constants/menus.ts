@@ -7,6 +7,11 @@ export const ITEM_MENUS: ItemMenu[] = [
     path: "/app/dashboard",
   },
   {
+    title: "Courses",
+    icon: "i-book-open",
+    path: "/app/courses",
+  },
+  {
     title: "User Management",
     icon: "i-user",
     path: "/app/user-management",

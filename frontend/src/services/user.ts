@@ -9,7 +9,7 @@ export const getUsers = async (): Promise<Response<User[]>> => {
   return result;
 };
 
-export const update = async (
+export const updateUser = async (
   id: string,
   data: Record<string, any>
 ): Promise<Response<null>> => {
@@ -18,10 +18,16 @@ export const update = async (
   return result;
 };
 
-export const add = async (
+export const createUser = async (
   data: Record<string, any>
 ): Promise<Response<null>> => {
   const result = await api({ path: apiPath.user.add, data });
+
+  return result;
+};
+
+export const deleteUser = async (id: string): Promise<Response<null>> => {
+  const result = await api({ path: apiPath.user.delete(id) });
 
   return result;
 };

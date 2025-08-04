@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 export function TopNavigation() {
   const { isAuth } = useAuth();
   return (
-    <section className="w-full flex border-2 border-black ">
+    <section className="w-full flex h-auto">
       <div>
         <Button variant="link">
           <img src="/images/logo.png" className="w-24 h-24" />

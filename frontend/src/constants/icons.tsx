@@ -1,7 +1,9 @@
 import {
+  BookOpen,
   CircleGauge,
   Edit,
   Info,
+  Plus,
   ShieldCheck,
   Trash,
   User,
@@ -15,6 +17,8 @@ export const ICONS = {
   "i-delete": <Trash />,
   "i-edit": <Edit />,
   "i-info": <Info />,
+  "i-add": <Plus />,
+  "i-book-open": <BookOpen />,
 };
 
 export type IconName = keyof typeof ICONS;

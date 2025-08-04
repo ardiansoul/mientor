@@ -39,7 +39,7 @@ export const extractToken = (
   req: Request
 ): { access_token: string; refresh_token: string } => {
   const { authorization } = req.headers;
-  const { refresh_token } = req.cookies;
+  const { refresh_token } = req.signedCookies;
 
   if (!authorization) throw new AuthError("Token not found");
   if (!refresh_token) throw new AuthError("token not found");

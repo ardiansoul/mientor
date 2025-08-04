@@ -10,13 +10,14 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "@/services";
 import query from "@/constants/query-keys";
 import { User } from "@/types/user";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { ICONS } from "@/constants/icons";
 import { Info } from "lucide-react";
+import { client } from "@/app/wrapper";
 
 const userFormSchema = z.object({
   firstName: z.string(),
@@ -52,14 +53,19 @@ export default function UserForm({
     },
   });
 
-  const { mutateAsync, isPending, error } = useMutation({
+  const { mutateAsync, error } = useMutation({
     mutationFn:
       actionType === "update"
-        ? (data: User) => UserService.update(id!, data)
-        : (data: User) => UserService.add(data),
+        ? (data: User) => UserService.updateUser(id!, data)
+        : (data: User) => UserService.createUser(data),
     mutationKey:
-      actionType === "update" ? [query.updateUser, id] : [query.addUser],
-    onSuccess: () => onSubmitSuccess?.(),
+      actionType === "update" ? query.updateUser(id!) : query.addUser,
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: query.users(0) });
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof userFormSchema>) => {
@@ -76,7 +82,7 @@ export default function UserForm({
       {error ? (
         <Alert>
           <Info />
-          <AlertTitle>{error?.message}</AlertTitle>
+          <AlertTitle>{error?.response?.data?.message}</AlertTitle>
         </Alert>
       ) : null}
       <form id="user-form" onSubmit={form.handleSubmit(onSubmit, onError)}>
